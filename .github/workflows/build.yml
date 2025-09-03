@@ -1,4 +1,4 @@
-name: SonarCloud
+name: CI with SonarCloud
 
 on:
   push:
@@ -9,9 +9,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  sonarqube:
+  tests:
+    name: Run Pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Run Pytest
+        run: pytest
+
+  sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
+    needs: tests   # מריץ אחרי שה־tests הסתיים, גם אם נכשל
+    if: always()   # חשוב: שירוץ גם אם ה־tests נפל
     steps:
       - uses: actions/checkout@v3
         with:
